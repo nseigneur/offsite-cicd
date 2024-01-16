@@ -142,6 +142,11 @@ jobs:
 
 ![](../images/img-037.png)
 
+## - Run the application
+
+1. `docker pull ghcr.io/<org>/<repo><tag>`
+2. `docker run -p 8080:8080 ghcr.io/<org>/<repo><tag>`
+
 ## Conclusion
 
 In this lab, you have learned how to:

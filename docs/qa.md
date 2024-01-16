@@ -33,75 +33,41 @@ For now, what you need to know is: as soon as you specify the `permissions` keyw
 
 ### 1.3 - Update the worklow
 
-1. In the `main` branch, edit the CI workflow `.github/workflows/node.js.yml`
+1. In the `main` branch, create the CI workflow `.github/workflows/pull_request.yml`
 
-2. Add the `permissions` keyword with the following permissions into the job section:
-
-    ```yml
-    build:
-      runs-on: ubuntu-latest
-      permissions:
-        # Required to allow actions/checkout to clone the repository onto the runner
-        contents: read
-        # Required to allow the vitest coverage action to write a comment into the pull request
-        pull-requests: write
-      # ... rest of the node.js.yml
-    ```
-
-3. Add the following step in the `build` job section of your workflow, right after the `npm test` step:
-
-    ```yml
-        # ... rest of the node.js.yml
-        - run: npm run test
-        - uses: davelosert/vitest-coverage-report-action@v1
-          with:
-            vite-config-path: vite.config.ts
-    ```
-
-4. While you're at it, how about giving the job a better `name`?
-
-    ```yml
-      jobs:
-        build:
-          name: "Build and Test"
-          runs-on: ubuntu-latest
-      # ... rest of the node.js.yml
-    ```
-
-5. Commit the `node.js.yml` file.
-
-### 1.4 - Remove the matrix build strategy
-
-As this is a frontend project, we don't need a matrix build strategy (which is more suited for backend projects that might be running on several Node.js versions). Removing the matrix build will also make the tests run only once.
-
-<details>
-<summary>Try to remove the matrix build yourself and make the `actions/setup-node` action only run on version 16.x. Expand this section to see the solution.</summary>
+2. We will now build and test the application on every pull_request to `main` and display the test coverage.
+3. This configuration does not apply on push to `main`, therefore we will not be packaging and push the application needlessly.
 
 ```yml
+name: Pull Requests
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
 jobs:
   build:
-    name: "Build and Test"
+    name: Build and Test
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.x
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build
-      - run: npm run test
-      - name: 'Report Coverage'
-        uses:  davelosert/vitest-coverage-report-action@v2
+    - uses: actions/checkout@v3
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20.x
+        cache: npm
+    - run: npm ci
+    - run: npm run build --if-present
+    - run: npm test
+    - name: 'Report Coverage'
+      uses:  davelosert/vitest-coverage-report-action@v2
 ```
 
-</details>
-
-### 1.5 - Create a new pull request
+### 1.4 - Create a new pull request
 
 1. Go to the main page of the repository.
 
