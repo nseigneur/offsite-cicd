@@ -13,11 +13,9 @@ You will leverage GitHub Actions to enhance security through automation by creat
 > **Note**:
 > Both of these features are part of GitHub Advanced Security (or GHAS for short), which offers additional security features beyond the actions we are using in this workshop. It's free for public repositories and can thus be used in this workshop. For more details, see [this page](https://docs.github.com/en/code-security/secure-coding/about-github-advanced-security).
 
-## Preparation: Enable dependency graph and GitHub Advanced Security (GHAS)
+## Preparation: Enable dependency graph 
 
-To activate both features, we first need to prepare our repository by enabling the dependency graph and GitHub Advanced Security:
-
-![Screenshot showing the code security and analysis tab in the repository settings](images/004/enable_graph_and_ghas.png)
+We first need to prepare our repository by enabling the dependency graph.
 
 1. Navigate to your repository's settings.
 2. Choose the **Code security and analysis** tab.
@@ -114,13 +112,51 @@ CodeQL operates by first building a database from your code and then running a s
 
 Actions speak louder than words (pun intended), so let's set up a workflow that performs code scanning with CodeQL.
 
-### 2.1 - Add a CodeQL workflow
+### 2.1 - Add a CodeQL workflow by Enabling GitHub Advanced Security (GHAS)
 
-In your repository, navigate to **Actions**, then click **New workflow**. Scroll down to the **Security** section, find the **CodeQL Analysis** workflow, and click on **Configure**:
+![Screenshot showing the code security and analysis tab in the repository settings](images/004/enable_graph_and_ghas.png)
 
-![Screenshot of the CodeQL Analysis workflow](images/004/configure_codeql_analysis.png)
+Choose advanced and put the following code:
 
-Examine the `.github/workflows/codeql.yml` file that is set to be created. Before committing it, let's understand and possibly modify some of its components.
+```yml
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{matrix.language}}"
+```
+
+Examine the `.github/workflows/codeql.yml` file that is set to be created. Let's understand and possibly modify some of its components.
 
 1. The `on:` section defines several triggers. You're already familiar with the `push` and `pull_request` triggers from earlier workflows. The `schedule` trigger, however, might be new to you:
 
@@ -138,7 +174,7 @@ Examine the `.github/workflows/codeql.yml` file that is set to be created. Befor
 
     Running a code scan once a week is advisable since new queries might have been added to the CodeQL repositories, potentially revealing vulnerabilities that were previously undetected in your code.
 
-2. The `strategy` section introduces another `matrix`, a concept you're already familiar with:
+2. The `strategy` section introduces a `matrix`:
 
      ```yml
     strategy:
