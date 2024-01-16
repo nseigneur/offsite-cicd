@@ -329,3 +329,19 @@ In this lab, you learned how to:
 
 > **Note**
 > What you learned in this lab is just the beginning of how GitHub Advanced Security can assist you in making your code secure. To delve deeper, feel free to read through the [Addendum - GitHub Advanced Security](./addendum-004-github-advanced-security.md)!
+
+### Extra Information - Permissions in a workflow
+
+You may have noticed the addition of **permissions** within a workflow. Any workflow interacting with GitHub resources requires permissions to do so. By managing permissions, GitHub users can ensure that only authorized users or processes can carry out specific actions, like calling an API with a private access key, executing certain automations, or deploying to production environments. This prevents unauthorized access to sensitive data, reduces the risk of unintentional or malicious changes, and helps to uphold the overall security and stability of the codebase. For example:
+
+1. The `actions/checkout` action requires read permissions for your repository to execute the checkout on the runner machine.
+2. The **Vitest Coverage Report** action needs to write a comment to a pull request, and thus needs permissions to do so.
+
+By default, GitHub Actions workflows are executed with a restricted [set of default permissions](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token), which can be extended as needed with the `permissions` keyword. This can be applied:
+
+- At the root of the workflow to set this permission for **all** jobs within the workflow.
+- Within a [job](https://docs.github.com/en/actions/using-jobs) definition itself to specify permissions for that job only. This approach is recommended from a security perspective, as it provides the least required privileges to your workflows and jobs.
+
+These permissions are applied to the `GITHUB_TOKEN`, which we will explore in more detail later.
+
+For now, what you need to know is: as soon as you specify the `permissions` keyword, the default permissions no longer apply. This means you must explicitly configure all necessary permissions in the job or workflow. Let's do this in the next step.

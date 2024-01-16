@@ -15,23 +15,7 @@ Doing that is straightforward with GitHub Actions. You determine where and when 
 
 3. Read the provided documentation and incorporate the action into your workflow.
 
-### 1.2 - Permissions in a workflow
-
-This is a good moment to discuss **permissions** within a workflow. Any workflow interacting with GitHub resources requires permissions to do so. By managing permissions, GitHub users can ensure that only authorized users or processes can carry out specific actions, like calling an API with a private access key, executing certain automations, or deploying to production environments. This prevents unauthorized access to sensitive data, reduces the risk of unintentional or malicious changes, and helps to uphold the overall security and stability of the codebase. For example:
-
-1. The `actions/checkout` action requires read permissions for your repository to execute the checkout on the runner machine.
-2. The **Vitest Coverage Report** action needs to write a comment to a pull request, and thus needs permissions to do so.
-
-By default, GitHub Actions workflows are executed with a restricted [set of default permissions](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token), which can be extended as needed with the `permissions` keyword. This can be applied:
-
-- At the root of the workflow to set this permission for **all** jobs within the workflow.
-- Within a [job](https://docs.github.com/en/actions/using-jobs) definition itself to specify permissions for that job only. This approach is recommended from a security perspective, as it provides the least required privileges to your workflows and jobs.
-
-These permissions are applied to the `GITHUB_TOKEN`, which we will explore in more detail later.
-
-For now, what you need to know is: as soon as you specify the `permissions` keyword, the default permissions no longer apply. This means you must explicitly configure all necessary permissions in the job or workflow. Let's do this in the next step.
-
-### 1.3 - Update the worklow
+### 1.2 - Update the worklow
 
 1. In the `main` branch, create the CI workflow `.github/workflows/pull_request.yml`
 
@@ -67,7 +51,7 @@ jobs:
       uses:  davelosert/vitest-coverage-report-action@v2
 ```
 
-### 1.4 - Create a new pull request
+### 1.3 - Create a new pull request
 
 1. Go to the main page of the repository.
 
@@ -82,7 +66,7 @@ jobs:
 6. Wait for the CI workflow to run, and you will see a new comment in your pull request with the code coverage.
 ![PR Comment with a coverage report from vitest](./images/vitest-coverage-report.png)
 
-### 1.6. (Optional) - Enforce a certain coverage threshold with Branch Protection rules
+### 1.4. (Optional) - Enforce a certain coverage threshold with Branch Protection rules
 
 As you can see, the test coverage of this project is quite low. Sometimes, we want to enforce a certain level of coverage on a project. This means that we would not allow merging a PR if it reduces the coverage below a certain threshold.
 
